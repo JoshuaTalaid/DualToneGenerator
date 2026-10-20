@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dual-Tone External Test Generator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="rack">
+
+  <header class="faceplate">
+    <div class="faceplate__title">
+      <h1>Dual-Tone External Test Generator</h1>
+      <p>An independent 36-symbol tone &amp; noise source for testing the dual-tone decoder over a real speaker&ndash;air&ndash;microphone path.</p>
+    </div>
+    <div class="faceplate__status" id="audioStatus">
+      <span class="led" id="audioLed"></span>
+      <span id="audioStatusText">tap anywhere to arm audio</span>
+    </div>
+  </header>
+
+  <main class="panels">
+
+    <!-- ============================= SIGNAL PANEL ============================= -->
+    <section class="panel panel--signal" aria-labelledby="signalTitle">
+      <h2 id="signalTitle" class="panel__title">Signal <span class="panel__subtitle">dual-tone transmitter</span></h2>
+
+      <div class="matrix-wrap">
+        <table class="matrix" id="matrix" aria-label="36-symbol frequency matrix / keypad">
+          <thead>
+            <tr>
+              <th class="matrix__corner">Hz</th>
+              <!-- high-group column headers injected by script.js -->
+            </tr>
+          </thead>
+          <tbody><!-- rows injected by script.js --></tbody>
+        </table>
+      </div>
+
+      <div class="field">
+        <label for="msgInput">Message</label>
+        <input id="msgInput" type="text" maxlength="64" placeholder="TEST 123" autocomplete="off" spellcheck="false">
+        <div class="field__hint" id="msgPreview">&nbsp;</div>
+      </div>
+
+      <div class="button-row">
+        <button type="button" class="btn btn--primary" id="playMsgBtn">Play message</button>
+        <button type="button" class="btn" id="randomBtn">Play random character</button>
+        <button type="button" class="btn btn--ghost" id="stopBtn">Stop</button>
+      </div>
+
+      <div class="sliders">
+        <div class="slider">
+          <label for="durSlider">Tone duration</label>
+          <input type="range" id="durSlider" min="50" max="2000" step="10" value="300">
+          <output id="durOut">300 ms</output>
+        </div>
+        <div class="slider">
+          <label for="gapSlider">Gap between characters</label>
+          <input type="range" id="gapSlider" min="50" max="500" step="10" value="150">
+          <output id="gapOut">150 ms</output>
+        </div>
+        <div class="slider">
+          <label for="levelSlider">Tone level</label>
+          <input type="range" id="levelSlider" min="0" max="100" step="1" value="70">
+          <output id="levelOut">70%</output>
+        </div>
+        <div class="slider">
+          <label for="devSlider">Frequency deviation</label>
+          <input type="range" id="devSlider" min="-5" max="5" step="0.1" value="0">
+          <output id="devOut">0.0%</output>
+        </div>
+        <div class="slider">
+          <label for="imbSlider">Tone imbalance (high vs. low)</label>
+          <input type="range" id="imbSlider" min="-20" max="20" step="1" value="0">
+          <output id="imbOut">0 dB</output>
+        </div>
+      </div>
+
+      <details class="edge-cases">
+        <summary>Invalid-signal tests <span>should be rejected by the decoder</span></summary>
+        <div class="button-row">
+          <button type="button" class="btn btn--edge" id="edgeSingleBtn">Single tone only</button>
+          <button type="button" class="btn btn--edge" id="edgeTripleBtn">Three tones at once</button>
+          <button type="button" class="btn btn--edge" id="edgeOutBtn">Out-of-table frequencies</button>
+          <button type="button" class="btn btn--edge" id="edgeShortBtn">Too short &middot; 80 ms</button>
+          <button type="button" class="btn btn--edge" id="edgeLongBtn">Overlong &middot; 1400 ms</button>
+        </div>
+      </details>
+    </section>
+
+    <!-- ============================= NOISE PANEL ============================= -->
+    <section class="panel panel--noise" aria-labelledby="noiseTitle">
+      <h2 id="noiseTitle" class="panel__title">Noise <span class="panel__subtitle">external interference source</span></h2>
+
+      <div class="field">
+        <span class="field__label">Noise type</span>
+        <div class="segmented" id="noiseType" role="radiogroup" aria-label="Noise type">
+          <button type="button" class="segmented__opt is-active" data-type="white">White</button>
+          <button type="button" class="segmented__opt" data-type="pink">Pink</button>
+        </div>
+      </div>
+
+      <div class="slider">
+        <label for="noiseSlider">Noise level</label>
+        <input type="range" id="noiseSlider" min="0" max="100" step="1" value="35">
+        <output id="noiseOut">35%</output>
+      </div>
+
+      <div class="button-row">
+        <button type="button" class="btn btn--primary" id="noiseToggleBtn">Start noise</button>
+        <button type="button" class="btn btn--ghost" id="clickBtn">Click / pop burst</button>
+      </div>
+
+      <div class="readout">
+        <span class="readout__label">Tone &rarr; noise level ratio</span>
+        <span class="readout__value" id="snrOut">&mdash; dB</span>
+        <p class="readout__note">An output-level reference only, not a measured acoustic SNR &mdash; the real figure depends on your speaker, room and microphone.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <section class="scope" aria-label="Output monitor">
+    <div class="scope__head">
+      <span>Output monitor</span>
+      <span id="scopeState">idle</span>
+    </div>
+    <canvas id="scopeCanvas" width="900" height="160"></canvas>
+  </section>
+
+  <footer class="notes">
+    <p>This page is a standalone signal source &mdash; it shares no code with the Python decoder. Run it on a phone or a second computer, place it near the microphone the decoder is listening on, and use it to confirm the decoder works over a real acoustic path and correctly rejects invalid signals, not just its own internal simulation.</p>
+  </footer>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
